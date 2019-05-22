@@ -10,6 +10,7 @@ var merge = require('xtend')
 var ReadStream = require('./read-stream')
 
 var sublevel = function (db, opts) {
+  console.log('sublevel', opts, db.options, db)
   opts = merge(db.options, opts)
   return shell ( nut ( db, precodec, new Codec ), [], ReadStream, opts)
 }
