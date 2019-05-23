@@ -78,6 +78,7 @@ var sublevel = module.exports = function (nut, prefix, createStream, options) {
     if(!cb) cb = errback
 
     ops = ops.map(function (op) {
+      //console.log('*** emitter batch', op.keyEncoding, op.valueEncoding)
       return {
         key:           op.key,
         value:         op.value,
@@ -87,6 +88,8 @@ var sublevel = module.exports = function (nut, prefix, createStream, options) {
         type:          op.type
       }
     })
+
+    //console.log('*** emitter opts', mergeOpts(opts))
 
     nut.apply(ops, mergeOpts(opts), function (err) {
       if(!err) { emitter.emit('batch', ops); cb(null) }

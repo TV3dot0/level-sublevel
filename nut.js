@@ -28,19 +28,25 @@ module.exports = function (db, precodec, codec, compare) {
   var waiting = [], ready = false
 
   function encodePrefix(prefix, key, opts1, opts2) {
-    return precodec.encode([ prefix, codec.encodeKey(key, opts1, opts2 ) ])
+    //if (prefix[0] !== 'meta' && prefix[0] !== 'log') console.log('encode prefix', prefix, key)
+    const encoded = precodec.encodeKey([ prefix, codec.encodeKey(key, opts1, opts2 ) ])
+    //if (prefix[0] !== 'meta' && prefix[0] !== 'log') console.log('prefix encoded', encoded);
+    return encoded
+    //return precodec.encode([ prefix, codec.encodeKey(key, opts1, opts2 ) ])
   }
 
   function decodePrefix(data) {
-    return precodec.decode(data)
+    //return precodec.decodeKey(data)
+    const decoded = precodec.decodeKey(data)
+    console.log('prefix decoded', decoded);
+    return decoded;
   }
 
   function addEncodings(op, prefix) {
     if(prefix && prefix.options) {
-      op.keyEncoding =
-        op.keyEncoding || prefix.options.keyEncoding
-      op.valueEncoding =
-        op.valueEncoding || prefix.options.valueEncoding
+      op.keyEncoding = op.keyEncoding || prefix.options.keyEncoding
+      op.valueEncoding = op.valueEncoding || prefix.options.valueEncoding
+      //console.log('nut encodings', op.keyEncoding, op.valueEncoding)
     }
     return op
   }
@@ -64,6 +70,7 @@ module.exports = function (db, precodec, codec, compare) {
     location: db.location,
     apply: function (ops, opts, cb) {
       //apply prehooks here.
+      //console.log('**** NUT PRE CODEC', precodec, codec);
       for(var i = 0; i < ops.length; i++) {
         var op = ops[i]
 
@@ -86,7 +93,7 @@ module.exports = function (db, precodec, codec, compare) {
       if(ops.length)
         (db.db || db).batch(
           ops.map(function (op) {
-            return {
+            const ret = {
               key: encodePrefix(op.prefix, op.key, opts, op),
               value:
                   op.type !== 'del'
@@ -98,7 +105,10 @@ module.exports = function (db, precodec, codec, compare) {
                 : undefined,
               type:
                 op.type || (op.value === undefined ? 'del' : 'put')
-            }
+            };
+            //if (ret.key !== '!meta!currentTerm' && ret.key !== '!meta!votedFor')
+              //console.log('****** nut', ret);
+            return ret
           }),
           opts,
           function (err) {
@@ -119,7 +129,21 @@ module.exports = function (db, precodec, codec, compare) {
         opts,
         function (err, value) {
           if(err) cb(err)
-          else    cb(null, codec.decodeValue(value, opts))
+          else    {
+            console.log('*** nut get value', value);
+            if (typeof value === 'object' && value.hasOwnProperty('data'))
+              cb(null, Buffer.from(value.data));
+            else {
+              const decoded = codec.decodeValue(value, opts);
+              console.log('*** nut decoded value', decoded);
+              if (decoded instanceof Buffer)
+                cb(null, Buffer.from(decoded));
+              else if (typeof decoded === 'object' && value.hasOwnProperty('data'))
+                cb(null, Buffer.from(decoded.data));
+              else
+                cb(null, decoded)
+            }
+          }
         }
       )
     },
@@ -175,17 +199,16 @@ module.exports = function (db, precodec, codec, compare) {
       //************************************************
       //hard coded defaults, for now...
       //TODO: pull defaults and encoding out of levelup.
-      opts.keyAsBuffer = opts.valueAsBuffer = false
+      //opts.keyAsBuffer = opts.valueAsBuffer = false
       //************************************************
-
+      opts.keyAsBuffer = precodec.buffer
+      opts.valueAsBuffer = codec.valueAsBuffer(opts)
 
       //this is vital, otherwise limit: undefined will
       //create an empty stream.
       if ('number' !== typeof opts.limit)
         opts.limit = -1
 
-      opts.keyAsBuffer = precodec.buffer
-      opts.valueAsBuffer = codec.valueAsBuffer(opts)
 
       function wrapIterator (iterator) {
         return {
