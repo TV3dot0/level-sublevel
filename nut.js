@@ -38,7 +38,7 @@ module.exports = function (db, precodec, codec, compare) {
   function decodePrefix(data) {
     //return precodec.decodeKey(data)
     const decoded = precodec.decodeKey(data)
-    console.log('prefix decoded', decoded);
+    //console.log('prefix decoded', decoded);
     return decoded;
   }
 
@@ -130,18 +130,22 @@ module.exports = function (db, precodec, codec, compare) {
         function (err, value) {
           if(err) cb(err)
           else    {
-            console.log('*** nut get value', value);
+            //console.log('*** nut get value', value);
             if (typeof value === 'object' && value.hasOwnProperty('data'))
               cb(null, Buffer.from(value.data));
             else {
               const decoded = codec.decodeValue(value, opts);
-              console.log('*** nut decoded value', decoded);
-              if (decoded instanceof Buffer)
+              //console.log('*** nut decoded value', decoded, typeof decoded);
+              if (decoded instanceof Buffer) {
+                //console.log('buffer', decoded);
+                cb(null, decoded);
+              } else if (typeof decoded === 'object' && decoded.hasOwnProperty('data')) {
+                //console.log('buffer-like', decoded);
                 cb(null, Buffer.from(decoded));
-              else if (typeof decoded === 'object' && value.hasOwnProperty('data'))
-                cb(null, Buffer.from(decoded.data));
-              else
+              } else {
+                //console.log('value', decoded);
                 cb(null, decoded)
+              }
             }
           }
         }
