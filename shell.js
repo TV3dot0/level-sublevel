@@ -46,7 +46,7 @@ var sublevel = module.exports = function (nut, prefix, createStream, options) {
     if('function' === typeof opts) { cb = opts; opts = {} }
     if(!cb) cb = errback;
 
-    console.log('sublevel put', key, value);
+    //console.log('sublevel put', key, value);
     nut.apply([{
       key: key,
       value: value,

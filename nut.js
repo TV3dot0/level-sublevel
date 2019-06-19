@@ -124,7 +124,7 @@ module.exports = function (db, precodec, codec, compare) {
     },
     get: function (key, prefix, opts, cb) {
       const stateId = db && db.db && db.db.db ? db.db.db.location.split('/').slice(-1)[0]: '<unknown loc>';
-      console.log('*** nut get', stateId, prefix, key.toString('hex'));
+      //console.log('*** nut get', stateId, prefix, key.toString('hex'));
       opts.asBuffer = codec.valueAsBuffer(opts);
       return (db.db || db).get(
         encodePrefix(prefix, key, preCodecOptions),
