@@ -102,7 +102,7 @@ var sublevel = module.exports = function (nut, prefix, createStream, options) {
         cb(new errors.NotFoundError('Key not found in database', err));
       }
       else {
-        console.log('found', key.toString('hex'), value);
+        //console.log('found', key.toString('hex'), value);
         cb(null, value)
       }
     })
