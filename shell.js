@@ -2,6 +2,8 @@ const EventEmitter = require('events').EventEmitter;
 const addpre = require('./range').addPrefix;
 
 const errors = require('level-errors');
+const debug = require('debug')('sublevel:shell');
+
 
 function isFunction (f) {
   return 'function' === typeof f
@@ -46,7 +48,7 @@ var sublevel = module.exports = function (nut, prefix, createStream, options) {
     if('function' === typeof opts) { cb = opts; opts = {} }
     if(!cb) cb = errback;
 
-    //console.log('sublevel put', key, value);
+    //debug('sublevel put', key, value);
     nut.apply([{
       key: key,
       value: value,
@@ -87,7 +89,7 @@ var sublevel = module.exports = function (nut, prefix, createStream, options) {
       }
     });
 
-    //console.log('sublevel batch', ops);
+    //debug('sublevel batch', ops);
     nut.apply(ops, mergeOpts(opts), function (err) {
       if(!err) { emitter.emit('batch', ops); cb(null) }
       if(err) return cb(err)
@@ -98,11 +100,11 @@ var sublevel = module.exports = function (nut, prefix, createStream, options) {
     if('function' === typeof opts) {cb = opts; opts = {}}
     nut.get(key, prefix, mergeOpts(opts), function (err, value) {
       if(err) {
-        console.log('not found', key.toString('hex'));
+        debug('not found', key.toString('hex'));
         cb(new errors.NotFoundError('Key not found in database', err));
       }
       else {
-        //console.log('found', key.toString('hex'), value);
+        //debug('found', key.toString('hex'), value);
         cb(null, value)
       }
     })

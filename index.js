@@ -5,13 +5,14 @@ var shell = require('./shell'); //the shell surrounds the nut
 //var precodec = require('./codec')
 var Codec = require('level-codec');
 var merge = require('xtend');
+var debug = require('debug')('sublevel:main');
 
 var ReadStream = require('./read-stream');
 
 var sublevel = function (db, options) {
 
   const allOptions = merge(db.options, options);
-  console.log('sublevel', allOptions);
+  debug('sublevel', allOptions);
 
   //return shell ( nut ( db, precodec, new Codec ), [], ReadStream, opts)
   return shell ( nut ( db, new Codec, new Codec ), [], ReadStream, allOptions)

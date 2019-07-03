@@ -1,6 +1,8 @@
 
 const hooks = require('./hooks');
 const ltgt = require('ltgt');
+const debug = require('debug')('sublevel:nut');
+
 
 const preCodecOptions = {
   keyEncoding: 'utf8',
@@ -107,7 +109,7 @@ module.exports = function (db, precodec, codec, compare) {
               type: op.type || (op.value === undefined ? 'del' : 'put')
             };
             //if (ret.type && ret.type === 'put' && ret.value && ret.value.type === 'put')
-              //console.log(stateId, ret);
+              //debug(stateId, ret);
             return ret
           }),
           opts,
@@ -124,7 +126,7 @@ module.exports = function (db, precodec, codec, compare) {
     },
     get: function (key, prefix, opts, cb) {
       const stateId = db && db.db && db.db.db ? db.db.db.location.split('/').slice(-1)[0]: '<unknown loc>';
-      //console.log('*** nut get', stateId, prefix, key.toString('hex'));
+      //debug('*** nut get', stateId, prefix, key.toString('hex'));
       opts.asBuffer = codec.valueAsBuffer(opts);
       return (db.db || db).get(
         encodePrefix(prefix, key, preCodecOptions),
@@ -151,7 +153,7 @@ module.exports = function (db, precodec, codec, compare) {
     pre: prehooks.add,
     post: posthooks.add,
     createDecoder: function (opts) {
-      //console.log('*** nut decoder opts', opts);
+      //debug('*** nut decoder opts', opts);
       if(opts.keys !== false && opts.values !== false)
         return function (key, value) {
           return {
@@ -185,7 +187,7 @@ module.exports = function (db, precodec, codec, compare) {
       return db.close(cb)
     },
     iterator: function (_opts, cb) {
-      //console.log('**** nut iterator', _opts);
+      //debug('**** nut iterator', _opts);
       var opts = clone(_opts || {});
       var prefix = _opts.prefix || [];
 
