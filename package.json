@@ -10,6 +10,7 @@
   "dependencies": {
     "abstract-leveldown": "^6.0.3",
     "bytewise": "~1.1.0",
+    "debug": "^4.1.1",
     "level-codec": "^9.0.0",
     "level-errors": "^2.0.0",
     "level-iterator-stream": "^2.0.3",
